@@ -1,0 +1,357 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Kdam+Thmor+Pro&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.screen {
+    width: 402px;
+    height: 874px;
+    background: #FFFEF6;
+    border-radius: 30px;
+    overflow-y: hidden;
+    overflow-x: visible;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+}
+
+.header {
+    background: #CEFF5F;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(176, 159, 27, 0.25);
+    z-index: 10;
+}
+
+.header-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.back-icon {
+    position: absolute;
+    left: 15px;
+}
+
+.header-spacer {
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.logo-img {
+    height: 28px;
+    width: auto;
+    margin: 0 auto;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.content.center {
+    justify-content: center;
+}
+
+.mascot-large {
+    width: 180px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.prompt-text {
+    font-family: 'Manrope', sans-serif;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    font-weight: 400;
+}
+
+.chips-scroll {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 15px 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-shrink: 0;
+    cursor: grab;
+    user-select: none;
+}
+
+.chips-scroll:active {
+    cursor: grabbing;
+}
+
+.chips-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.chip {
+    font-family: 'Manrope', sans-serif;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.chip:hover {
+    background: #000000;
+    color: white;
+}
+
+.input-area {
+    background: #CEFF5F;
+    padding: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 -4px 15px rgba(176, 159, 27, 0.25);
+    z-index: 10;
+    position: relative;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    padding: 10px 15px;
+    border: 2px solid #333;
+}
+
+.attach-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.text-input {
+    font-family: 'Manrope', sans-serif;
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    background: transparent;
+    color: #333;
+}
+
+.text-input::placeholder {
+    color: #999;
+}
+
+.send-btn {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.search-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.chat-area {
+    flex: 1;
+    padding: 20px 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    font-family: 'Manrope', sans-serif;
+    max-width: 85%;
+    padding: 15px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+}
+
+.message.user {
+    align-self: flex-end;
+    background: #E8D5FF;
+    border: 2px solid #333;
+    border-radius: 18px;
+    box-shadow: 5px 5px 0 #000000;
+    margin-top: 250px;
+}
+
+.message.bot {
+    align-self: flex-start;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    padding: 20px 18px 18px 18px;
+    position: relative;
+    z-index: 2;
+    margin-top: 30px;
+}
+
+.quote-img {
+    position: absolute;
+    top: -12px;
+    left: 10px;
+    width: 24px;
+    height: auto;
+    opacity: 1;
+    filter: brightness(0) saturate(100%);
+}
+
+.mascot-bot {
+    position: absolute;
+    top: -45px;
+    left: 10px;
+    width: 70px;
+    height: auto;
+    z-index: 3;
+}
+
+.bot-content {
+    font-family: 'Kdam Thmor Pro', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1a1a1a;
+}
+
+.bot-warning {
+    font-weight: 700;
+    font-size: 16px;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    font-family: 'Kdam Thmor Pro', sans-serif;
+}
+
+.bot-danger {
+    font-size: 17px;
+    color: #FF3B30;
+    font-weight: 700;
+}
+
+.bot-steps {
+    font-weight: 700;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-family: 'Kdam Thmor Pro', sans-serif;
+}
+
+.bot-content ol {
+    padding-left: 22px;
+    margin-top: 6px;
+}
+
+.bot-content li {
+    margin-bottom: 4px;
+    font-family: 'Kdam Thmor Pro', sans-serif;
+}
+
+.bot-content strong {
+    font-weight: 700;
+}
+
+.loading-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 0 20px 8px 20px;
+    flex-shrink: 0;
+}
+
+.mascot-loading {
+    width: 120px;
+    height: auto;
+    flex-shrink: 0;
+    margin-bottom: -8px;
+}
+
+.dots {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.dots span {
+    width: 7px;
+    height: 7px;
+    background: #333;
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 1.2s infinite;
+}
+
+.dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.demo-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.demo-nav button {
+    font-family: 'Manrope', sans-serif;
+    padding: 10px 20px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.demo-nav button:hover {
+    background: #CEFF5F;
+}
