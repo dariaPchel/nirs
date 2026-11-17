@@ -1,105 +1,106 @@
 
 from rag.bm25 import retrieve
-from agent.llm import generate_answer
+from agent.llm import analyze_situation, generate_recommendations
 
 
 def build_context(hits: list) -> str:
-    """
-    Формирует контекст из найденных документов.
-    """
-
-    context = ""
+    documents = []
 
     for hit in hits:
-        context += (
-            f"Схема: {hit['schema']}\n"
-            f"Признаки мошенничества: {hit['bad_signs']}\n"
-            f"Что делать: {hit['to_do']}\n"
-            f"Источник: {hit['source']}\n\n"
-        )
+        document = f"""
+Документ №{hit['id']}
 
-    return context
+Мошенническая схема:
+{hit['schema']}
 
+Признаки мошенничества:
+{hit['bad_signs']}
+"""
+        documents.append(document)
 
-def build_messages(question: str, context: str) -> list:
-    """
-    Формирует сообщения для языковой модели.
-    """
-
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "Тебя зовут FRAUDI. Ты помощник по выявлению "
-                "признаков онлайн-мошенничества. "
-                "Твоя задача — анализировать ситуации пользователя, "
-                "помогать распознавать подозрительные признаки "
-                "и объяснять, как действовать безопасно.\n\n"
-
-                "ПРАВИЛА:\n"
-                "1. Отвечай только на русском языке.\n"
-                "2. Чтобы понять, является ли ситуация пользователя мошеннической схемой, читай раздел 'Признаки мошенничества'\n"
-                "3. Если ты УВЕРЕН, что пользователь стал жертвой мошенничества, сформулируй пользователю понятный план действий на основе раздела 'Что делать'\n"
-                "4. Учитывай все найденные документы, если они относятся "
-                "к ситуации пользователя.\n"
-                "5. Не считай первый найденный документ единственно верным: "
-                "сопоставляй описание ситуации со всеми подходящими схемами.\n"
-                "6. Не придумывай признаки мошенничества и рекомендации, "
-                "которых нет в контексте.\n"
-                "7. Если информации недостаточно, ПРЯМО СООБЩИ ОБ ЭТОМ.\n"
-                "8. Если ситуация не связана с онлайн-мошенничеством, "
-                "вежливо объясни, что ты специализируешься на этой теме.\n"
-                "9. Объясняй простым и понятным языком.\n"
-                "10. Не утверждай, что пользователь стал жертвой мошенников, "
-                "если имеющихся данных недостаточно для такого вывода."
-            )
-        },
-        {
-            "role": "user",
-            "content": (
-                f"Ситуация пользователя:\n{question}\n\n"
-                f"Найденные документы базы знаний:\n{context}\n\n"
-                "Проанализируй ситуацию и дай понятный ответ. "
-                "Если обнаружены признаки мошенничества, объясни, "
-                "какие именно признаки совпадают с описанными схемами, "
-                "и перечисли соответствующие рекомендации."
-            )
-        }
-    ]
-
-    return messages
+    return "\n\n".join(documents)
 
 
-def run_rag(question: str, docs: dict, bm25_index: dict, k: int = 5) -> dict:
-    """
-    Выполняет поиск документов и генерирует ответ с помощью LLM.
-    """
+def run_rag(
+    question: str,
+    docs: dict,
+    bm25_index: dict,
+    k: int = 1
+) -> dict:
 
-    # Ищем наиболее релевантные документы
+    # 1. Ищем подходящие документы
     hits = retrieve(question, docs, bm25_index, k)
 
-    # Если документы не найдены, не обращаемся к LLM
     if not hits:
         return {
             "question": question,
-            "answer": (
-                "В базе знаний не найдены документы, "
-                "которые могли бы помочь ответить на ваш вопрос."
-            ),
-            "sources": []
+            "document_id": None,
+            "description": "В базе знаний не найдены подходящие документы.",
+            "sources": [],
+            "status": "finished"
         }
 
-    # Формируем контекст из найденных документов
+    # 2. Формируем компактный контекст
     context = build_context(hits)
 
-    # Формируем сообщения для LLM
-    messages = build_messages(question, context)
+    user_message = f"""
+Ситуация пользователя:
+{question}
 
-    # Получаем ответ языковой модели
-    answer = generate_answer(messages)
+Документы базы знаний:
+{context}
 
+Проанализируй ситуацию и верни структурированный результат.
+"""
+
+    # 3. Первый вызов LLM — расследование
+    result = analyze_situation(user_message)
+
+    # 4. Проверяем выбранный ID
+    valid_ids = {hit["id"] for hit in hits}
+
+    if result.document_id not in valid_ids:
+        document_id = None
+    else:
+        document_id = result.document_id
+
+    # 5. Возвращаем состояние расследования
     return {
         "question": question,
+        "document_id": document_id,
+        "description": result.description,
+        "sources": hits,
+        "status": (
+            "awaiting_confirmation"
+            if document_id is not None
+            else "finished"
+        )
+    }
+
+
+def continue_rag(state: dict, docs: dict) -> dict:
+
+    document_id = state.get("document_id")
+
+    # Проверяем, что продолжение действительно возможно
+    if state.get("status") != "awaiting_confirmation":
+        raise ValueError("Расследование не ожидает подтверждения.")
+
+    if document_id not in docs:
+        raise ValueError("Документ не найден в базе знаний.")
+
+    # 1. Получаем рекомендации выбранного документа
+    to_do = docs[document_id]["to_do"]
+
+    # 2. Второй вызов LLM — рекомендации
+    answer = generate_recommendations(
+        question=state["question"],
+        description=state["description"],
+        to_do=to_do
+    )
+
+    return {
+        **state,
         "answer": answer,
-        "sources": hits
+        "status": "finished"
     }
