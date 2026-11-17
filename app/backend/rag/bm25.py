@@ -2,7 +2,7 @@
 from collections import defaultdict, Counter
 from math import log
 
-from preprocessing import tokens
+from rag.preprocessing import tokens
 
 
 # Параметры алгоритма BM25
@@ -13,30 +13,30 @@ b = 0.75
 def build_index(docs: dict) -> dict:
     """
     Строит инвертированный индекс BM25.
-
-    docs — словарь документов:
-    {
-        "D01": {"title": "...", "content": "..."},
-        ...
-    }
     """
 
     index = defaultdict(dict)
     lengths = {}
 
-    # Проходим по всем документам
     for doc, data in docs.items():
 
-        # Токенизируем содержимое документа
-        words = tokens(data["content"])
+        # Объединяем содержательные поля документа
+        text = (
+            data["schema"] + " " +
+            data["bad_signs"] + " " +
+            data["to_do"]
+        )
+
+        # Токенизируем текст
+        words = tokens(text)
 
         # Сохраняем длину документа
         lengths[doc] = len(words)
 
-        # Считаем частоту каждого слова в документе
+        # Считаем частоту каждого слова
         counts = Counter(words)
 
-        # Записываем частоты в инвертированный индекс
+        # Заполняем инвертированный индекс
         for word, tf in counts.items():
             index[word][doc] = tf
 
@@ -57,8 +57,6 @@ def build_index(docs: dict) -> dict:
 def retrieve(query: str, docs: dict, bm25_index: dict, k: int = 5) -> list:
     """
     Ищет наиболее релевантные документы по запросу.
-
-    Возвращает k документов с наибольшими оценками BM25.
     """
 
     index = bm25_index["index"]
@@ -68,19 +66,19 @@ def retrieve(query: str, docs: dict, bm25_index: dict, k: int = 5) -> list:
 
     scores = defaultdict(float)
 
-    # Убираем повторяющиеся слова из запроса
+    # Обрабатываем уникальные слова запроса
     for word in dict.fromkeys(tokens(query)):
 
         # Получаем документы, содержащие слово
         postings = index.get(word, {})
 
-        # Количество документов, содержащих это слово
+        # Количество документов, содержащих слово
         df = len(postings)
 
-        # IDF — оценка редкости слова
+        # Рассчитываем IDF
         idf = log(1 + (N - df + 0.5) / (df + 0.5))
 
-        # Рассчитываем вклад слова в оценку каждого документа
+        # Рассчитываем вклад слова в оценку документов
         for doc, tf in postings.items():
 
             norm = k1 * (
@@ -91,22 +89,23 @@ def retrieve(query: str, docs: dict, bm25_index: dict, k: int = 5) -> list:
                 idf * tf * (k1 + 1) / (tf + norm)
             )
 
-    # Сортируем документы по убыванию оценки BM25
+    # Сортируем документы по убыванию оценки
     ranked = sorted(
         scores,
         key=lambda doc: (-scores[doc], doc)
     )
 
-    # Формируем результат поиска
+    # Формируем результаты поиска
     results = []
 
     for doc in ranked[:k]:
         results.append({
             "id": doc,
-            "title": docs[doc]["title"],
-            "content": docs[doc]["content"],
-            "score": scores[doc],
-            "source": docs[doc].get("source", "")
+            "schema": docs[doc]["schema"],
+            "bad_signs": docs[doc]["bad_signs"],
+            "to_do": docs[doc]["to_do"],
+            "source": docs[doc].get("source", ""),
+            "score": scores[doc]
         })
 
     return results
