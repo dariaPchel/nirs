@@ -14,7 +14,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 0px;
 }
 
 .screen {
@@ -41,6 +41,7 @@ body {
     flex-shrink: 0;
     border-bottom: 2px solid #000;
     z-index: 10;
+    margin-top: 0;
 }
 
 .header-spacer {
@@ -259,46 +260,43 @@ body {
 
 .back-btn {
     position: absolute;
-    left: 15px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #CEFF5F;
-    border: 2px solid #000;
+    left: 25px;
+    background: transparent;
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    box-shadow: 2px 2px 0 #000;
     transition: all 0.1s;
-    color: #000;
+    color: #CEFF5F;
     text-decoration: none;
 }
 
 .back-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 #000;
+    transform: scale(1.1);
 }
 
 .back-btn:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 #000;
+    transform: scale(0.95);
+}
+
+.back-btn svg {
+    width: 32px;
+    height: 32px;
 }
 
 .back-btn svg {
     width: 20px;
     height: 20px;
 }
-
 .menu-btn {
     position: absolute;
     right: 15px;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    background: #CEFF5F;
-    border: 2px solid #000;
+    background: transparent;
+    border: none;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -306,25 +304,22 @@ body {
     justify-content: center;
     gap: 4px;
     padding: 0;
-    box-shadow: 2px 2px 0 #000;
-    transition: all 0.1s;
+    transition: all 0.2s;
 }
 
 .menu-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 #000;
+    transform: scale(1.1);
 }
 
 .menu-btn:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 #000;
+    transform: scale(0.95);
 }
 
 .burger-line {
     display: block;
-    width: 18px;
-    height: 2px;
-    background: #000;
+    width: 24px;
+    height: 3px;
+    background: #CEFF5F;
     border-radius: 2px;
     transition: all 0.2s;
 }

@@ -3,183 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FRAUDI</title>
+    <title>FRAUDI — Расследование</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Empty-state: маскот по центру чата (не трогаем остальные стили) */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+        .empty-state img {
+            width: 150px;
+            height: auto;
+            object-fit: contain;
+        }
+        .empty-state p {
+            font-family: 'Manrope', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-
-<div class="screen">
-    <!-- Шапка -->
-    <div class="header">
-        <!-- 1. Кнопка назад (уголок) -->
-        <a href="landing.html" class="back-btn" aria-label="Назад">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </a>
-
-        <div class="logo-text">FRAUDI</div>
-
-        <!-- 4. Кнопка меню (бургер) -->
-        <button class="menu-btn" aria-label="Меню" onclick="toggleSidebar()">
-            <span class="burger-line"></span>
-            <span class="burger-line"></span>
-            <span class="burger-line"></span>
-        </button>
-    </div>
-
-    <!-- Область чата -->
-    <div class="chat-area">
-
-        <!-- 3. Плашка инициации расследования -->
-        <div class="initiated-badge">
-            РАССЛЕДОВАНИЕ НАЧАТО: 2026.10.10_14:30
+    <div class="screen">
+        <!-- HEADER -->
+        <div class="header">
+            <a href="landing.html" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+            <div class="logo-text">FRAUDI</div>
+            <button class="menu-btn" id="menuBtn">
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+                <span class="burger-line"></span>
+            </button>
         </div>
 
-        <!-- Сообщение ПОЛЬЗОВАТЕЛЯ -->
-        <div class="message-row user-row">
-            <div class="message user">
-                Мне только что звонили, представились службой безопасности Сбербанка. Сказали, что на моё имя пытаются взять кредит в другом банке, и попросили продиктовать код из СМС, чтобы "отменить заявку". Это нормально?
+        <!-- CHAT AREA -->
+        <div class="chat-area" id="chatArea">
+            <div class="initiated-badge" id="timestamp">РАССЛЕДОВАНИЕ НАЧАТО: --:--:--</div>
+
+            <!-- Маскот по центру (пустое состояние) -->
+            <div class="empty-state" id="emptyState">
+                <img src="assets/mascot.png" alt="FRAUDI">
+                <p>Расскажите, что случилось</p>
             </div>
-            <!-- 2. Время под сообщением -->
-            <div class="message-time user-time">14:30</div>
         </div>
 
-        <!-- Сообщение FRAUDI -->
-        <div class="message-row bot-row">
-            <div class="bot-header">
-                <div class="bot-avatar">
-                    <img src="assets/mascot.png" alt="FRAUDI">
+        <!-- INPUT AREA -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <svg class="attach-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path>
+                </svg>
+                <input type="text" class="text-input" id="textInput" placeholder="Опишите ситуацию..." autocomplete="off">
+            </div>
+            <button class="send-btn" id="sendBtn">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-mascot">
+                    <img src="assets/mascot_working.jpg" alt="FRAUDI за работой">
                 </div>
-                <span class="bot-name">FRAUDI</span>
-            </div>
-            <div class="message bot">
-                <div class="message-text">
-                    <p><strong>Нет. Это не нормально.</strong></p>
-
-                    <p>«Отменить кредит с помощью кода из СМС»? <strong>Звучит как очень сомнительная схема.</strong></p>
-
-                    <p>Настоящая проблема здесь не в самом звонке, а в том, что у вас пытаются получить код подтверждения. Не доверяйте звонившему только потому, что он знает название банка или говорит уверенным голосом.</p>
-
-                    <p><strong>Один важный вопрос: вы уже сообщили ему код?</strong></p>
+                <div class="sidebar-title">Что ещё я умею?</div>
+                <div class="sidebar-cards">
+                    <div class="sidebar-card">
+                        <div class="card-icon card-icon-lime">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"></path>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">ПРОВЕРИТЬ НОМЕР</div>
+                            <div class="card-desc">Узнай, кто звонил</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-card">
+                        <div class="card-icon card-icon-purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">АНАЛИЗ ССЫЛКИ</div>
+                            <div class="card-desc">Безопасно ли?</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-card">
+                        <div class="card-icon card-icon-lime">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">МЕНЯ ОБМАНУЛИ</div>
+                            <div class="card-desc">Что делать?</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="fraud-badges">
-                    <span class="badge badge-lime">РИСК МОШЕННИЧЕСТВА: ВЫСОКИЙ</span>
-                </div>
-            </div>
-            <!-- 2. Время под сообщением -->
-            <div class="message-time bot-time">14:31</div>
-        </div>
-
-        <!-- Сообщение ПОЛЬЗОВАТЕЛЯ -->
-        <div class="message-row user-row">
-            <div class="message user">
-                Не успел. Спасибо, дружище!
-            </div>
-            <!-- 2. Время под сообщением -->
-            <div class="message-time user-time">14:32</div>
-        </div>
-
-    </div>
-
-    <!-- Область ввода -->
-    <div class="input-area">
-        <div class="input-wrapper">
-            <svg class="attach-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-            </svg>
-            <input type="text" class="text-input" placeholder="Опишите ситуацию...">
-        </div>
-        <button class="send-btn">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-        </button>
-    </div>
-
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <!-- Mascot в центре -->
-            <div class="sidebar-mascot">
-                <img src="assets/mascot_working.jpg" alt="FRAUDI working">
-            </div>
-            <!-- Заголовок меню -->
-            <div class="sidebar-title">Что ещё я умею?</div>
-
-            <!-- Карточки функций -->
-            <div class="sidebar-cards">
-                <!-- Карточка 1: Проверить номер -->
-                <div class="sidebar-card">
-                    <div class="card-icon card-icon-lime">
+                <div class="sidebar-footer">
+                    <button class="settings-btn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
                         </svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">ПРОВЕРИТЬ НОМЕР</div>
-                        <div class="card-desc">Узнай, кто звонил</div>
-                    </div>
-                </div>
-
-                <!-- Карточка 2: Анализ ссылки -->
-                <div class="sidebar-card">
-                    <div class="card-icon card-icon-purple">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        <span>НАСТРОЙКИ</span>
+                        <svg class="arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">АНАЛИЗ ССЫЛКИ</div>
-                        <div class="card-desc">Безопасно ли?</div>
-                    </div>
+                    </button>
+                    <div class="sidebar-copyright">© 2026 FRAUDI SYSTEMS INC.</div>
                 </div>
-
-                <!-- Карточка 3: Меня обманули -->
-                <div class="sidebar-card">
-                    <div class="card-icon card-icon-lime">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">МЕНЯ ОБМАНУЛИ</div>
-                        <div class="card-desc">Что делать?</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer с настройками -->
-            <div class="sidebar-footer">
-                <button class="settings-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                    <span>НАСТРОЙКИ</span>
-                    <svg class="arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-                <div class="sidebar-copyright">© 2026 FRAUDI SYSTEMS INC.</div>
             </div>
         </div>
     </div>
-    </div>
-</div>
 
-<script>
-    function toggleSidebar() {
+    <script>
+        // === УТИЛИТЫ ===
+        const chatArea = document.getElementById('chatArea');
+        const textInput = document.getElementById('textInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('open');
-    }
-</script>
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const timestampEl = document.getElementById('timestamp');
+        const emptyState = document.getElementById('emptyState');
 
+        // Ставим текущее время
+        const now = new Date();
+        const timeStr = now.toISOString().replace('T', '_').slice(0, 16);
+        timestampEl.textContent = `РАССЛЕДОВАНИЕ НАЧАТО: ${timeStr}`;
+
+        // === SIDEBAR ===
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+
+        // === ДОБАВЛЕНИЕ СООБЩЕНИЙ ===
+        function addMessage(text, isUser) {
+            const row = document.createElement('div');
+            row.className = `message-row ${isUser ? 'user-row' : 'bot-row'}`;
+
+            // Для бота добавляем аватар и имя
+            if (!isUser) {
+                const header = document.createElement('div');
+                header.className = 'bot-header';
+                header.innerHTML = `
+                    <div class="bot-avatar">
+                        <img src="assets/mascot.png" alt="FRAUDI">
+                    </div>
+                    <div class="bot-name">FRAUDI</div>
+                `;
+                row.appendChild(header);
+            }
+
+            const msg = document.createElement('div');
+            msg.className = `message ${isUser ? 'user' : 'bot'}`;
+            msg.innerHTML = `<div class="message-text">${text}</div>`;
+
+            // Время
+            const time = document.createElement('div');
+            time.className = `message-time ${isUser ? 'user-time' : ''}`;
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            time.textContent = `${h}:${m}`;
+
+            row.appendChild(msg);
+            row.appendChild(time);
+            chatArea.appendChild(row);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // === ОТПРАВКА ЗАПРОСА ===
+        async function sendMessage() {
+            const question = textInput.value.trim();
+            if (!question) return;
+
+            // Убираем пустое состояние с маскотом при первом сообщении
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            addMessage(question, true);
+            textInput.value = '';
+
+            // Индикатор "Думаю..."
+            const loadingRow = document.createElement('div');
+            loadingRow.className = 'message-row bot-row';
+            loadingRow.innerHTML = `
+                <div class="bot-header">
+                    <div class="bot-avatar">
+                        <img src="assets/mascot.png" alt="FRAUDI">
+                    </div>
+                    <div class="bot-name">FRAUDI</div>
+                </div>
+                <div class="message bot">
+                    <div class="message-text">Анализирую ситуацию...</div>
+                </div>
+            `;
+            chatArea.appendChild(loadingRow);
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+                loadingRow.remove();
+
+                let answerText = data.answer || 'Не удалось получить ответ.';
+                if (data.sources && data.sources.length > 0) {
+                    answerText += '<div class="fraud-badges">';
+                    data.sources.forEach(s => {
+                        answerText += `<span class="badge badge-lime">${s.id}: ${s.schema}</span>`;
+                    });
+                    answerText += '</div>';
+                }
+                addMessage(answerText, false);
+
+            } catch (error) {
+                loadingRow.remove();
+                addMessage('⚠️ Ошибка соединения с сервером. Убедись, что <b>main.py</b> запущен!', false);
+                console.error(error);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
 </body>
 </html>
