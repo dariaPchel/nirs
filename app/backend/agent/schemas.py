@@ -1,6 +1,9 @@
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 
 
-class AnalysisResult(BaseModel):
-    document_id: str | None
-    description: str
+class RAGResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    answer: str
+    source_ids: list[str]

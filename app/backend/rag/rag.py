@@ -1,20 +1,27 @@
 
 from rag.bm25 import retrieve
-from agent.llm import analyze_situation, generate_recommendations
+from agent.llm import generate_answer
 
 
 def build_context(hits: list) -> str:
+    """
+    Формирует контекст из найденных документов.
+    """
+
     documents = []
 
     for hit in hits:
         document = f"""
-Документ №{hit['id']}
+Документ {hit['id']}
 
-Мошенническая схема:
+Схема мошенничества:
 {hit['schema']}
 
 Признаки мошенничества:
 {hit['bad_signs']}
+
+Что делать:
+{hit['to_do']}
 """
         documents.append(document)
 
@@ -25,82 +32,66 @@ def run_rag(
     question: str,
     docs: dict,
     bm25_index: dict,
-    k: int = 1
+    k: int = 3
 ) -> dict:
 
     # 1. Ищем подходящие документы
-    hits = retrieve(question, docs, bm25_index, k)
+    hits = retrieve(
+        query=question,
+        docs=docs,
+        bm25_index=bm25_index,
+        k=k
+    )
 
+    # 2. Если ничего не найдено, LLM не вызываем
     if not hits:
         return {
             "question": question,
-            "document_id": None,
-            "description": "В базе знаний не найдены подходящие документы.",
+            "answer": (
+                "В базе знаний не нашлось документов, "
+                "содержащих подходящую информацию "
+                "для анализа вашей ситуации."
+            ),
             "sources": [],
-            "status": "finished"
+            "retrieved": []
         }
 
-    # 2. Формируем компактный контекст
+    # 3. Формируем контекст
     context = build_context(hits)
 
     user_message = f"""
-Ситуация пользователя:
+Описание ситуации пользователя:
 {question}
 
 Документы базы знаний:
 {context}
 
-Проанализируй ситуацию и верни структурированный результат.
+Проанализируй ситуацию и сформируй ответ
+строго по предоставленным документам.
 """
 
-    # 3. Первый вызов LLM — расследование
-    result = analyze_situation(user_message)
+    # 4. Получаем ответ LLM
+    result = generate_answer(user_message)
 
-    # 4. Проверяем выбранный ID
+    # 5. Проверяем, что LLM использовала только найденные документы
     valid_ids = {hit["id"] for hit in hits}
 
-    if result.document_id not in valid_ids:
-        document_id = None
-    else:
-        document_id = result.document_id
+    source_ids = [
+        doc_id
+        for doc_id in result.source_ids
+        if doc_id in valid_ids
+    ]
 
-    # 5. Возвращаем состояние расследования
+    # 6. Оставляем только документы, на которые опирается ответ
+    sources = [
+        hit
+        for hit in hits
+        if hit["id"] in source_ids
+    ]
+
     return {
         "question": question,
-        "document_id": document_id,
-        "description": result.description,
-        "sources": hits,
-        "status": (
-            "awaiting_confirmation"
-            if document_id is not None
-            else "finished"
-        )
-    }
-
-
-def continue_rag(state: dict, docs: dict) -> dict:
-
-    document_id = state.get("document_id")
-
-    # Проверяем, что продолжение действительно возможно
-    if state.get("status") != "awaiting_confirmation":
-        raise ValueError("Расследование не ожидает подтверждения.")
-
-    if document_id not in docs:
-        raise ValueError("Документ не найден в базе знаний.")
-
-    # 1. Получаем рекомендации выбранного документа
-    to_do = docs[document_id]["to_do"]
-
-    # 2. Второй вызов LLM — рекомендации
-    answer = generate_recommendations(
-        question=state["question"],
-        description=state["description"],
-        to_do=to_do
-    )
-
-    return {
-        **state,
-        "answer": answer,
-        "status": "finished"
+        "answer": result.answer,
+        "sources": sources,
+        "retrieved": hits
     }

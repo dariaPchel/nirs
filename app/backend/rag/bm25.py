@@ -5,8 +5,8 @@ from math import log
 from rag.preprocessing import tokens
 
 
-# Параметры алгоритма BM25
-k1 = 1.5
+# Параметры алгоритма BM25 из презентации
+k1 = 1.2
 b = 0.75
 
 
@@ -54,9 +54,14 @@ def build_index(docs: dict) -> dict:
     }
 
 
-def retrieve(query: str, docs: dict, bm25_index: dict, k: int = 5) -> list:
+def retrieve(
+    query: str,
+    docs: dict,
+    bm25_index: dict,
+    k: int = 3
+) -> list:
     """
-    Ищет наиболее релевантные документы по запросу.
+    Ищет k наиболее релевантных документов по запросу.
     """
 
     index = bm25_index["index"]
@@ -75,11 +80,17 @@ def retrieve(query: str, docs: dict, bm25_index: dict, k: int = 5) -> list:
         # Количество документов, содержащих слово
         df = len(postings)
 
+        if df == 0:
+            continue
+
         # Рассчитываем IDF
         idf = log(1 + (N - df + 0.5) / (df + 0.5))
 
         # Рассчитываем вклад слова в оценку документов
         for doc, tf in postings.items():
+
+            if avgdl == 0:
+                continue
 
             norm = k1 * (
                 1 - b + b * lengths[doc] / avgdl

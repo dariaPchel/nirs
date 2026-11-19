@@ -1,14 +1,23 @@
 
+import os
 from pathlib import Path
 
 import yaml
-from ollama import chat
+from dotenv import load_dotenv
+from groq import Groq
 
-from agent.schemas import AnalysisResult
+from agent.schemas import RAGResponse
 
 
+# Загружаем переменные окружения
+load_dotenv()
+
+
+# Пути к промптам
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+
+# Характер FRAUDI
 CHARACTER = (PROMPTS_DIR / "CHARACTER.md").read_text(
     encoding="utf-8"
 )
@@ -23,66 +32,60 @@ def load_prompt(filename: str) -> str:
     return data["system_prompt"]
 
 
-ANALYSIS_PROMPT = load_prompt("analysis_prompt.yaml")
-RECOMMENDATION_PROMPT = load_prompt("recommendation_prompt.yaml")
-
-MODEL = "qwen2.5:3b"
+# Системный промпт
+RAG_PROMPT = load_prompt("analysis_prompt.yaml")
 
 
-def analyze_situation(user_message: str) -> AnalysisResult:
-    response = chat(
+# Настройки Groq
+MODEL = os.getenv(
+    "GROQ_MODEL",
+    "openai/gpt-oss-20b"
+)
+
+
+def get_client() -> Groq:
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        raise RuntimeError(
+            "Не найден GROQ_API_KEY. "
+            "Добавьте API-ключ в файл .env."
+        )
+
+    return Groq(api_key=api_key)
+
+
+def generate_answer(user_message: str) -> RAGResponse:
+    client = get_client()
+
+    response = client.chat.completions.create(
         model=MODEL,
         messages=[
             {
                 "role": "system",
-                "content": CHARACTER + "\n\n" + ANALYSIS_PROMPT
+                "content": CHARACTER + "\n\n" + RAG_PROMPT
             },
             {
                 "role": "user",
                 "content": user_message
             }
         ],
-        format=AnalysisResult.model_json_schema(),
-        options={
-            "temperature": 0
-        }
-    )
-
-    return AnalysisResult.model_validate_json(
-        response.message.content
-    )
-
-
-def generate_recommendations(
-    question: str,
-    description: str,
-    to_do: str
-) -> str:
-
-    response = chat(
-        model=MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": CHARACTER + "\n\n" + RECOMMENDATION_PROMPT
-            },
-            {
-                "role": "user",
-                "content": f"""
-Ситуация пользователя:
-{question}
-
-Результат расследования:
-{description}
-
-Рекомендации из базы знаний:
-{to_do}
-"""
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "fraudi_response",
+                "strict": True,
+                "schema": RAGResponse.model_json_schema()
             }
-        ],
-        options={
-            "temperature": 0.2
-        }
+        },
+        temperature=0
     )
 
-    return response.message.content
+    content = response.choices[0].message.content
+
+    if not content:
+        raise RuntimeError(
+            "FRAUDI вернул пустой ответ."
+        )
+
+    return RAGResponse.model_validate_json(content)
